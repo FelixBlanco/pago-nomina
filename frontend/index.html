@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Pago Nomina</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">	
+</head>
+<body>
+	<div id="app">
+		<div class="container">
+			<div class="row justify-content-center">
+				<div class="col-md-6">
+					<div class="mt-5">
+						<h2 class="p-5 text-center">Pago Nomina - APP</h2>
+						<nav>
+						  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+						    <a class="nav-item nav-link active" id="nav-empleado-tab" data-toggle="tab" href="#nav-empleado" role="tab" aria-controls="nav-empleado" aria-selected="true">Empleados <span class="badge">{{nro_empleado}}</span></a>
+						    <a class="nav-item nav-link" id="nav-pendientes-tab" data-toggle="tab" href="#nav-pendientes" role="tab" aria-controls="nav-pendientes" aria-selected="false">Pendientes <span class="badge">{{nro_pendientes}}</span></a>
+						  </div>
+						</nav>
+
+						<!-- TAB - EMPLEADOS -->
+						<div class="tab-content" id="nav-tabContent">
+						  <div class="tab-pane fade show active" id="nav-empleado" role="tabpanel" aria-labelledby="nav-empleado-tab">
+						  	<div class="mt-2">
+						  		<div class="text-right" data-toggle="modal" data-target="#newEmpleadoModal">
+						  			<i class="fas fa-plus"></i> Nuevo Empleado
+						  		</div>
+						  		<div class="spinner-border" role="status" v-if='spinnerIs.empleado'>
+								  <span class="sr-only">Loading...</span>
+								</div>
+							  	<ul class="list-group mt-2" v-if="list_empleados != '' ">
+							  		<li 
+							  			class="list-group-item" 
+							  			v-for="list_empleado in list_empleados"
+							  		>
+							  			{{list_empleado.empleado}}
+							  			<i class="fas fa-pencil-alt" @click="editEmpleado(list_empleado)"></i>							  			
+							  			<i class="far fa-eye"  @click="perfilEmpleado(list_empleado.id)"></i>							  			
+							  		</li>
+							  	</ul>					  		
+						  	</div>
+						  </div>
+							
+						<!-- TAB DE PENDIENTES -->
+						  <div class="tab-pane fade" id="nav-pendientes" role="tabpanel" aria-labelledby="nav-pendientes-tab">
+						  	<div>
+						  		<div class="text-right mt-2" data-toggle="modal" data-target="#newPagoModal">
+						  			<i class="fas fa-plus"></i> Nuevo Pago
+						  		</div>				
+						  		<div class="spinner-border" role="status" v-if='spinnerIs.pago'>
+								  <span class="sr-only">Loading...</span>
+								</div>						  			  		
+						  		<table class="table mt-2">
+						  			<tr>
+						  				<th>Nombre</th>
+						  				<th>Monto</th>	
+						  				<th></th>				  			
+						  			</tr>
+						  			<tr v-for="list_pago in list_pagos">
+						  				<td>{{list_pago.nombre_empleado}}</td>
+						  				<td>{{list_pago.monto}}</td>
+						  				<td class="text-right">
+						  					<button class="btn btn-secondary btn-sm" @click="pagarEmpleado(list_pago)">Pagar</button>
+						  				</td>					  			
+						  			</tr>		
+						  		</table>
+						  	</div>
+						  </div>
+						</div>				
+						
+					</div>
+				</div>
+			</div>
+
+
+			<!-- Modal empleado perfil -->
+			<div class="modal fade" id="PerfilEmpleadoModal" tabindex="-1" role="dialog" aria-labelledby="PerfilEmpleadoModalLabel" aria-hidden="true">
+			  <div class="modal-dialog" role="document">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title" id="PerfilEmpleadoModalLabel">Perfil de <b>{{p_empleado.empleado}}</b></h5>
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
+			      </div>
+			      <div class="modal-body">
+			        <h2 class="p-2"><small>Empleado:</small> {{p_empleado.empleado}}</h2>
+			        <div v-if="list_pagos_listos != ''">
+				        <h4 class="p-2 mt-2">Pagos Listo</h4>
+				        <table class="table table-hover">
+				        	<tr>
+				        		<th>Monto</th>
+				        		<th>Codigo de Pago</th>
+				        	</tr>
+				  			<tr v-for="list_pagos_listo in list_pagos_listos">
+				  				<td>{{ list_pagos_listo.monto }} </td>
+				  				<td>{{ list_pagos_listo.codigo_pago }}</td>							  		
+				  			</tr>				        
+				        </table>			        	
+			        </div>
+			      </div>
+				<!-- 	 <div class="modal-footer">
+			        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+			        <button type="button" class="btn btn-primary">Save changes</button>
+			      </div> -->
+			    </div>
+			  </div>
+			</div>		
+
+			<!-- Modal empleado new -->
+			<div class="modal fade" id="newEmpleadoModal" tabindex="-1" role="dialog" aria-labelledby="newEmpleadoModalLabel" aria-hidden="true">
+			  <div class="modal-dialog" role="document">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title" id="newEmpleadoModalLabel">Nuevo Empleado</h5>
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
+			      </div>
+			      <div class="modal-body">
+			        <div class="form-group">
+			        	<input type="text" v-model="e.empleado" class="form-control" placeholder="Nombre y Apellido">
+			        </div>
+			      </div>
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+			        <button type="button" class="btn btn-primary" @click="empleado('new')">Guardar</button>
+			      </div>
+			    </div>
+			  </div>
+			</div>	
+
+			<!-- Modal empleado edit -->
+			<div class="modal fade" id="editEmpleadoModal" tabindex="-1" role="dialog" aria-labelledby="editEmpleadoModalLabel" aria-hidden="true">
+			  <div class="modal-dialog" role="document">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title" id="editEmpleadoModalLabel">Editar {{e.empleado}}</h5>
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
+			      </div>
+			      <div class="modal-body">
+			        <div class="form-group">
+			        	<input type="text" v-model="e.empleado" class="form-control" placeholder="Editar empleado">
+			        </div>
+			      </div>
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+			        <button type="button" class="btn btn-primary" @click="empleado('edit')">Guardar Cambios</button>
+			      </div>
+			    </div>
+			  </div>
+			</div>	
+<!-- Pagos -->
+			<!-- Modal pago new -->
+			<div class="modal fade" id="newPagoModal" tabindex="-1" role="dialog" aria-labelledby="newPagoModalLabel" aria-hidden="true">
+			  <div class="modal-dialog" role="document">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title" id="newPagoModalLabel">Nuevo Pago</h5>
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
+			      </div>
+			      <div class="modal-body">
+			        <div class="form-group">
+			        	<select class="form-control" v-model="p.empleado_id">
+			        		<option v-for="l_e in list_empleados" :value="l_e.id">{{l_e.empleado}}</option>
+			        	</select>
+			        </div>
+			        <div class="form-group">
+			        	<input type="text" class="form-control" v-model="p.monto" placeholder="Monto">
+			        </div>	
+			        <div class="form-group">
+			        	<input type="text" class="form-control" v-model="p.concepto" placeholder="concepto">
+			        </div>				        		        
+			      </div>
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-secondary" data-dismiss="modal">cerrar</button>
+			        <button type="button" class="btn btn-success" @click="pagos('new')">Guardar Pago</button>
+			      </div>
+			    </div>
+			  </div>
+			</div>	
+
+			<!-- Modal pendientes edit -->
+			<div class="modal fade" id="editPagoModal" tabindex="-1" role="dialog" aria-labelledby="editPagoModalLabel" aria-hidden="true">
+			  <div class="modal-dialog" role="document">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title" id="editPagoModalLabel">Modal title</h5>
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
+			      </div>
+			      <div class="modal-body">
+			        ...
+			      </div>
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			        <button type="button" class="btn btn-primary">Save changes</button>
+			      </div>
+			    </div>
+			  </div>
+			</div>					
+
+			<!-- Modal Pagar Pago -->
+			<div class="modal fade" id="PagarPagoModal" tabindex="-1" role="dialog" aria-labelledby="PagarPagoModalLabel" aria-hidden="true">
+			  <div class="modal-dialog" role="document">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title" id="PagarPagoModalLabel">Comprobante del Pago</h5>
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
+			      </div>
+			      <div class="modal-body">
+			        <div class="form-group">
+			        	<input type="text" class="form-control" v-model="listo_pagar.codigo_pago" placeholder="Codigo del Banco">
+			        </div>
+			      </div>
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+			        <button type="button" class="btn btn-success" @click="pagarListo()">Guardar</button>
+			      </div>
+			    </div>
+			  </div>
+			</div>	
+
+		</div>
+		
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+	<script>
+		new Vue({
+			el: '#app',
+			created:function(){
+				this.getEmpleado()
+				this.getListaPagos()
+			},
+			data:{
+				routeLink: 'http://localhost:8000/api/v1/',
+				list_empleados: [], nro_empleado: 0,
+				e:{empleado: null, id: null}, 
+				p_empleado: [],
+
+				p:{ id:null, monto: null, concepto: null, startus: 0, empleado_id: null },
+				list_pagos: [], list_pagos_listos: [], nro_pendientes: 0,
+				listo_pagar: { id: null, startus: 1, empleado_id:null, codigo_pago:null  },
+				spinnerIs:{empleado:false, pago:false},
+			}, 
+			methods:{
+				getEmpleado:function(){
+					this.spinnerIs.empleado = true
+					axios.get(this.routeLink+"empleados").then( resp => {
+						this.spinnerIs.empleado = false
+						this.list_empleados = resp.data
+						this.nro_empleado = resp.data.length					
+					})
+				},
+				empleado:function(is){
+					if(is == 'new'){
+						axios.post(this.routeLink+"empleados",this.e).then( resp => {
+							console.log(resp)
+							this.getEmpleado()
+							$('#newEmpleadoModal').modal('hide')
+						}, error => {
+							console.log(error)
+						})
+					}
+
+					if(is == 'edit'){
+						axios.put(this.routeLink+"empleados/"+this.e.id,this.e).then( resp => {
+							console.log(resp)
+							this.getEmpleado()
+							$('#editEmpleadoModal').modal('hide')
+						}, error => {
+							console.log(error)
+						})
+					}
+
+				},
+				editEmpleado:function(empleado){
+					this.e.id = empleado.id
+					this.e.empleado = empleado.empleado
+					$('#editEmpleadoModal').modal('show')
+				},
+				perfilEmpleado:function(idEmpleado){
+					this.getListaPagosListos(idEmpleado)
+					axios.get(this.routeLink+"empleados/"+idEmpleado).then( resp => {
+						this.p_empleado = resp.data
+					})					
+					$('#PerfilEmpleadoModal').modal('show')
+				},				
+
+				getListaPagos:function(){
+					this.spinnerIs.pago = true
+					axios.get(this.routeLink+"pendientes").then( resp => {						
+						this.spinnerIs.pago = false
+						this.list_pagos = resp.data.data
+						this.nro_pendientes = resp.data.data.length
+					})
+				},
+				pagos:function(is){
+					if(is == 'new'){
+						axios.post(this.routeLink+"pagos",this.p).then( resp => {
+							this.list_pagos = resp.data
+							this.getListaPagos()
+							$('#newPagoModal').modal('hide')
+						})
+					} 
+				},
+				pagarEmpleado:function(empleado){
+					$('#PagarPagoModal').modal('show')
+					this.listo_pagar.id = empleado.id
+					this.listo_pagar.empleado_id = empleado.empleado_id								
+				},
+				pagarListo:function(){
+					axios.put(this.routeLink+'pagos/'+this.listo_pagar.id, this.listo_pagar).then( resp => {
+						$('#PagarPagoModal').modal('hide')
+						this.getListaPagosListos(resp.data.empleado_id)
+						this.getListaPagos()
+					})
+				},
+				getListaPagosListos:function(idEmpleado){
+					axios.get(this.routeLink+"listos/"+idEmpleado).then( resp => {						
+						this.list_pagos_listos = resp.data.data
+					})
+				},								
+			}
+		})
+	</script>
+</body>
+</html>
