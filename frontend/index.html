@@ -36,8 +36,9 @@
 							  			v-for="list_empleado in list_empleados"
 							  		>
 							  			{{list_empleado.empleado}}
-							  			<i class="fas fa-pencil-alt" @click="editEmpleado(list_empleado)"></i>							  			
-							  			<i class="far fa-eye"  @click="perfilEmpleado(list_empleado.id)"></i>							  			
+							  			<i class="fas fa-pencil-alt" @click="editEmpleado(list_empleado)"></i>
+							  			<i class="far fa-eye"  @click="perfilEmpleado(list_empleado.id)"></i>
+							  			<i class="far fa-credit-card" @click="cuentaEmpleado(list_empleado)"></i>
 							  		</li>
 							  	</ul>					  		
 						  	</div>
@@ -62,7 +63,8 @@
 						  				<td>{{list_pago.nombre_empleado}}</td>
 						  				<td>{{list_pago.monto}}</td>
 						  				<td class="text-right">
-						  					<button class="btn btn-secondary btn-sm" @click="pagarEmpleado(list_pago)">Pagar</button>
+						  					<button class="btn btn-secondary btn-sm" @click="infoCuenta(list_pago.infoCuenta)">Cuenta</button>
+						  					<button class="btn btn-success btn-sm" @click="pagarEmpleado(list_pago)">Pagar</button>
 						  				</td>					  			
 						  			</tr>		
 						  		</table>
@@ -167,9 +169,16 @@
 			      </div>
 			      <div class="modal-body">
 			        <div class="form-group">
-			        	<select class="form-control" v-model="p.empleado_id">
+			        	<label for="">Empleado</label>
+			        	<select class="form-control" v-model="p.empleado_id" @change="nroCuentas($event)">
 			        		<option v-for="l_e in list_empleados" :value="l_e.id">{{l_e.empleado}}</option>
 			        	</select>
+			        </div>
+			        <div class="form-group">
+			        	<label for="">Numero de Cuenta</label>	
+			        	<select class="form-control" v-model="p.cuenta_id">
+			        		<option v-for="n_e in cuentas_empleado" :value="n_e.id">{{n_e.titular}} {{n_e.nro}}</option>
+			        	</select>			        	
 			        </div>
 			        <div class="form-group">
 			        	<input type="text" class="form-control" v-model="p.monto" placeholder="Monto">
@@ -230,6 +239,73 @@
 			  </div>
 			</div>	
 
+			<!-- Modal Nro de cuentas -->
+			<div class="modal fade" id="cuentaEmpleadoModal" tabindex="-1" role="dialog" aria-labelledby="cuentaEmpleadoModalLabel" aria-hidden="true">
+			  <div class="modal-dialog" role="document">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title" id="cuentaEmpleadoModalLabel">Nuevo Empleado</h5>
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
+			      </div>
+			      <div class="modal-body">
+			        <div class="form-group">
+			        	<input type="number" v-model="c.nro" class="form-control" placeholder="Nro de cuenta">
+			        </div>
+			      	<div class="row">
+			      		<div class="col-md-6">
+					        <div class="form-group">
+					        	<input type="text" v-model="c.titular" class="form-control" placeholder="Titular">
+					        </div>			      			
+			      		</div>
+			      		<div class="col-md-6">
+					        <div class="form-group">
+					        	<input type="text" v-model="c.cedula" class="form-control" placeholder="Cedula">
+					        </div>			      						      			
+			      		</div>
+			      	</div>
+			      	<div class="row">
+			      		<div class="col-md-12 text-center">
+			      			<button type="button" class="btn btn-success" @click="addCuenta()">Guardar</button>
+			      		</div>
+			      	</div>
+			      	
+			      	<hr>
+
+			      	<h4>Cuentas</h4>
+			      	<ul class="list-group">
+			      		<li v-for="lista_cuenta in lista_cuentas" class="list-group-item">
+			      			<b>Nro Cuenta:</b> {{lista_cuenta.nro}} <br>
+			      			<b>Titular:</b> {{lista_cuenta.titular}}, <b>Cedula I.</b> {{lista_cuenta.cedula}}
+			      			<button class="btn btn-danger btn-sm" @click="deleteCuenta(lista_cuenta.id)">Eliminar</button>
+			      		</li>
+			      	</ul>
+			      </div>
+			    </div>
+			  </div>
+			</div>	
+
+
+			<!-- Informacion de cuenta  -->
+			<div class="modal fade" id="cuentaInfoEmpleadoModal" tabindex="-1" role="dialog" aria-labelledby="cuentaInfoEmpleadoModalLabel" aria-hidden="true">
+			  <div class="modal-dialog" role="document">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title" id="cuentaInfoEmpleadoModalLabel">Informacion de Cuenta, {{info_cuenta.titular}}</h5>
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
+			      </div>
+			      <div class="modal-body">
+					<p>Titular: {{info_cuenta.titular}}</p>
+					<p>Nro Cuenta: {{info_cuenta.nro}}</p>
+					<p>Cedula Identidad: {{info_cuenta.cedula}}</p>
+			      </div>
+			    </div>
+			  </div>
+			</div>				
+
 		</div>
 		
 	</div>
@@ -254,10 +330,12 @@
 				e:{empleado: null, id: null}, 
 				p_empleado: [],
 
-				p:{ id:null, monto: null, concepto: null, startus: 0, empleado_id: null },
+				p:{ id:null, monto: null, concepto: null, startus: 0, empleado_id: null, cuenta_id:null },
 				list_pagos: [], list_pagos_listos: [], nro_pendientes: 0,
 				listo_pagar: { id: null, startus: 1, empleado_id:null, codigo_pago:null  },
 				spinnerIs:{empleado:false, pago:false},
+				c: {nro:null, titular:null, cedula:null, empleado_id: null}, lista_cuentas : [],
+				cuentas_empleado: [], info_cuenta: []
 			}, 
 			methods:{
 				getEmpleado:function(){
@@ -336,7 +414,38 @@
 					axios.get(this.routeLink+"listos/"+idEmpleado).then( resp => {						
 						this.list_pagos_listos = resp.data.data
 					})
-				},								
+				},
+
+				getCuenta(empleado){
+					axios.get(this.routeLink+'cuentas/'+empleado).then( resp => {
+						this.lista_cuentas = resp.data
+					});
+				},
+				cuentaEmpleado:function(data){
+					this.infoEmpleado = data
+					this.c.empleado_id = data.id
+					$('#cuentaEmpleadoModal').modal('show')
+					this.getCuenta(data.id)
+				},
+				addCuenta(){
+					axios.post(this.routeLink+'cuentas', this.c).then( resp => {
+						this.getCuenta(resp.data.data.empleado_id)
+					})
+				},
+				deleteCuenta:function(id){
+					axios.get(this.routeLink+'delete-cuenta/'+id).then( resp => {
+						this.getCuenta(id)
+					})
+				},
+				nroCuentas:function(data){
+					axios.get(this.routeLink+'cuentas/'+data.target.value).then( resp => {
+						this.cuentas_empleado = resp.data
+					});
+				},
+				infoCuenta:function(data){
+					this.info_cuenta = data
+					$('#cuentaInfoEmpleadoModal').modal('show')
+				}							
 			}
 		})
 	</script>

@@ -20,7 +20,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::group(['prefix' => 'v1', 'middleware' => 'cors'], function () { 
 	Route::resource('empleados','empleadosController');
 	Route::resource('pagos','pagosController');
-
+	Route::resource('cuentas','cuentaController');
+	Route::get('delete-cuenta/{id}','cuentaController@destroy');
+	
 	Route::get('pendientes','pagosController@pendientes');
 	Route::get('listos/{idEmpleado}','pagosController@listos');
 	Route::get('porPerfil/{idEmpleado}','pagosController@porPerfil');

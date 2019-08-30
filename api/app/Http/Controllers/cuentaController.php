@@ -3,10 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Pago;
 use App\Cuenta;
 
-class pagosController extends Controller
+class cuentaController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,8 +13,8 @@ class pagosController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {
-        return Pago::get();
+    {        
+        // 
     }
 
     /**
@@ -36,10 +35,9 @@ class pagosController extends Controller
      */
     public function store(Request $request)
     {
-        $p = new Pago($request->all());
-        $p->startus = 0;
-        $p->save();
-        return response()->json(['data' => $p],200);
+        $c = new Cuenta($request->all());
+        $c->save();
+        return response()->json(['data'=> $c], 200);
     }
 
     /**
@@ -50,7 +48,7 @@ class pagosController extends Controller
      */
     public function show($id)
     {
-        return Pago::find($id);
+        return Cuenta::where('empleado_id',$id)->get();
     }
 
     /**
@@ -73,10 +71,10 @@ class pagosController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $p = Pago::find($id);
-        $p->fill($request->all());
-        $p->save();
-        return response()->json(['data' => $p],200);
+        $c = Cuenta::find($id);
+        $c->fill($request->all());
+        $c->save();
+        return response()->json(['data' => $c],200);
     }
 
     /**
@@ -87,27 +85,9 @@ class pagosController extends Controller
      */
     public function destroy($id)
     {
-        $p = Pago::find($id);
-        $p->delete();
-        $p->save();
-        return response()->json(['data' => $p],200);
+        $c=Cuenta::find($id);
+        $c->delete();
+        $c->save();
+        return response()->json(['msj' => 'Se elimino correctamente'],200);
     }
-
-    public function pendientes(){
-        $p = Pago::where('startus',0)->get();
-        $p->each(function($p){
-            $p->nombre_empleado = $p->empleado->empleado;
-            $p->infoCuenta = Cuenta::find($p->cuenta_id);
-        });
-        return response()->json(['data' => $p],200);
-    }
-
-    public function listos($idEmpleado){
-        $p = Pago::where([['startus',1],['empleado_id',$idEmpleado]])->get();
-        return response()->json(['data' => $p],200);
-    } 
-    public function porPerfil($idEmpleado){
-        $p = Pago::where('empleado_id',$idEmpleado)->get();
-        return response()->json(['data' => $p],200);
-    }        
 }
