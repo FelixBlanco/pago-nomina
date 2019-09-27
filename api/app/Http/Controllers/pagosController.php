@@ -103,11 +103,11 @@ class pagosController extends Controller
     }
 
     public function listos($idEmpleado){
-        $p = Pago::where([['startus',1],['empleado_id',$idEmpleado]])->get();
+        $p = Pago::where([['startus',1],['pagos.empleado_id',$idEmpleado]])->join('cuentas','cuentas.id','=','pagos.cuenta_id')->get();
         return response()->json(['data' => $p],200);
     } 
     public function porPerfil($idEmpleado){
-        $p = Pago::where('empleado_id',$idEmpleado)->get();
+        $p = Pago::where('empleado_id',$idEmpleado)->join('cuentas','cuentas.id','=','pagos.cuenta_id')->get();
         return response()->json(['data' => $p],200);
     }        
 }

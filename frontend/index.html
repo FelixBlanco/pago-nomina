@@ -10,9 +10,16 @@
 	<div id="app">
 		<div class="container">
 			<div class="row justify-content-center">
-				<div class="col-md-6">
+				<div class="col-md-8">
 					<div class="mt-5">
-						<h2 class="p-5 text-center">Pago Nomina - APP</h2>
+						<div>
+							<h2 class="p-5 text-center">Pago Nomina</h2>
+							<div class="text-right" data-toggle="modal" data-target="#newEmpleadoModal">
+					  			<button class="btn btn-sm btn-success"><i class="fas fa-plus"></i> Nuevo Empleado</button>
+					  		</div>
+						</div>
+						
+
 						<nav>
 						  <div class="nav nav-tabs" id="nav-tab" role="tablist">
 						    <a class="nav-item nav-link active" id="nav-empleado-tab" data-toggle="tab" href="#nav-empleado" role="tab" aria-controls="nav-empleado" aria-selected="true">Empleados <span class="badge">{{nro_empleado}}</span></a>
@@ -24,23 +31,21 @@
 						<div class="tab-content" id="nav-tabContent">
 						  <div class="tab-pane fade show active" id="nav-empleado" role="tabpanel" aria-labelledby="nav-empleado-tab">
 						  	<div class="mt-2">
-						  		<div class="text-right" data-toggle="modal" data-target="#newEmpleadoModal">
-						  			<i class="fas fa-plus"></i> Nuevo Empleado
-						  		</div>
 						  		<div class="spinner-border" role="status" v-if='spinnerIs.empleado'>
 								  <span class="sr-only">Loading...</span>
 								</div>
-							  	<ul class="list-group mt-2" v-if="list_empleados != '' ">
-							  		<li 
-							  			class="list-group-item" 
-							  			v-for="list_empleado in list_empleados"
-							  		>
-							  			{{list_empleado.empleado}}
-							  			<i class="fas fa-pencil-alt" @click="editEmpleado(list_empleado)"></i>
-							  			<i class="far fa-eye"  @click="perfilEmpleado(list_empleado.id)"></i>
-							  			<i class="far fa-credit-card" @click="cuentaEmpleado(list_empleado)"></i>
-							  		</li>
-							  	</ul>					  		
+								<div class="row" v-if="list_empleados != '' ">
+									<div class="col-md-6" v-for="list_empleado in list_empleados">
+										<div class="shadow bg-white p-2 mt-2">
+											<h4>{{list_empleado.empleado}} <br> <small style="font-size: 12px;"> {{list_empleado.created_at}} </small></h4>										
+											<div class="btn-group justify-content-end" role="group" aria-label="Basic example">
+											  <button type="button" class="btn btn-primary btn-sm"><i class="fas fa-pencil-alt" @click="editEmpleado(list_empleado)"></i></button>
+											  <button type="button" class="btn btn-info btn-sm"><i class="far fa-eye"  @click="perfilEmpleado(list_empleado.id)"></i></button>
+											  <button type="button" class="btn btn-secondary btn-sm"><i class="far fa-credit-card" @click="cuentaEmpleado(list_empleado)"></i></button>
+											</div>											
+										</div>
+									</div>
+								</div>								  	
 						  	</div>
 						  </div>
 							
@@ -63,8 +68,10 @@
 						  				<td>{{list_pago.nombre_empleado}}</td>
 						  				<td>{{list_pago.monto}}</td>
 						  				<td class="text-right">
-						  					<button class="btn btn-secondary btn-sm" @click="infoCuenta(list_pago.infoCuenta)">Cuenta</button>
-						  					<button class="btn btn-success btn-sm" @click="pagarEmpleado(list_pago)">Pagar</button>
+											<div class="btn-group justify-content-end" role="group" aria-label="Basic example">
+											  <button class="btn btn-secondary btn-sm" @click="infoCuenta(list_pago.infoCuenta)">Cuenta</button>
+											  <button class="btn btn-success btn-sm" @click="pagarEmpleado(list_pago)">Pagar</button>
+											</div>						  					
 						  				</td>					  			
 						  			</tr>		
 						  		</table>
@@ -82,31 +89,27 @@
 			  <div class="modal-dialog" role="document">
 			    <div class="modal-content">
 			      <div class="modal-header">
-			        <h5 class="modal-title" id="PerfilEmpleadoModalLabel">Perfil de <b>{{p_empleado.empleado}}</b></h5>
+			        <h5 class="modal-title" id="PerfilEmpleadoModalLabel">Empleado <b>{{p_empleado.empleado}}</b></h5>
 			        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 			          <span aria-hidden="true">&times;</span>
 			        </button>
 			      </div>
-			      <div class="modal-body">
-			        <h2 class="p-2"><small>Empleado:</small> {{p_empleado.empleado}}</h2>
-			        <div v-if="list_pagos_listos != ''">
-				        <h4 class="p-2 mt-2">Pagos Listo</h4>
-				        <table class="table table-hover">
+			      <div class="modal-body">			        
+			        <div v-if="list_pagos_listos != ''">				        
+				        <table class="table table-hover mt-2">
 				        	<tr>
 				        		<th>Monto</th>
-				        		<th>Codigo de Pago</th>
+				        		<th>Referencia</th>
+				        		<th>Titular</th>
 				        	</tr>
 				  			<tr v-for="list_pagos_listo in list_pagos_listos">
 				  				<td>{{ list_pagos_listo.monto }} </td>
-				  				<td>{{ list_pagos_listo.codigo_pago }}</td>							  		
+				  				<td>{{ list_pagos_listo.codigo_pago }}</td>		
+				  				<td>{{ list_pagos_listo.nro }} - {{ list_pagos_listo.titular }}</td>							  		
 				  			</tr>				        
 				        </table>			        	
 			        </div>
 			      </div>
-				<!-- 	 <div class="modal-footer">
-			        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-			        <button type="button" class="btn btn-primary">Save changes</button>
-			      </div> -->
 			    </div>
 			  </div>
 			</div>		
@@ -174,12 +177,40 @@
 			        		<option v-for="l_e in list_empleados" :value="l_e.id">{{l_e.empleado}}</option>
 			        	</select>
 			        </div>
-			        <div class="form-group">
-			        	<label for="">Numero de Cuenta</label>	
-			        	<select class="form-control" v-model="p.cuenta_id">
-			        		<option v-for="n_e in cuentas_empleado" :value="n_e.id">{{n_e.titular}} {{n_e.nro}}</option>
-			        	</select>			        	
-			        </div>
+			        
+			        <!-- Verificacion de Cuenta -->
+					<div v-if="newCuenta">
+						<div class="form-group">
+							<p class="text-center">No tiene cuenta, puedes agregar aca</p>
+						</div>
+				        <div class="form-group">
+				        	<input type="number" v-model="cuenta_p.nro" class="form-control" placeholder="Nro de cuenta">
+				        </div>
+				      	<div class="row">
+				      		<div class="col-md-6">
+						        <div class="form-group">
+						        	<input type="text" v-model="cuenta_p.titular" class="form-control" placeholder="Titular">
+						        </div>			      			
+				      		</div>
+				      		<div class="col-md-6">
+						        <div class="form-group">
+						        	<input type="text" v-model="cuenta_p.cedula" class="form-control" placeholder="Cedula">
+						        </div>			      						      			
+				      		</div>
+				      	</div>
+				        <div class="form-group">
+				        	<button class="btn btn-success btn-block btn-sm" @click="addCuenta('pagos')">Agregar</button>
+				        </div>			
+					</div>
+					<div v-else>
+				        <div class="form-group">
+				        	<label for="">Numero de Cuenta</label>	
+				        	<select class="form-control" v-model="p.cuenta_id">
+				        		<option v-for="n_e in cuentas_empleado" :value="n_e.id">{{n_e.titular}} {{n_e.nro}}</option>
+				        	</select>			        	
+				        </div>
+					</div>
+						
 			        <div class="form-group">
 			        	<input type="text" class="form-control" v-model="p.monto" placeholder="Monto">
 			        </div>	
@@ -316,138 +347,7 @@
 	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-
-	<script>
-		new Vue({
-			el: '#app',
-			created:function(){
-				this.getEmpleado()
-				this.getListaPagos()
-			},
-			data:{
-				routeLink: 'http://localhost:8000/api/v1/',
-				list_empleados: [], nro_empleado: 0,
-				e:{empleado: null, id: null}, 
-				p_empleado: [],
-
-				p:{ id:null, monto: null, concepto: null, startus: 0, empleado_id: null, cuenta_id:null },
-				list_pagos: [], list_pagos_listos: [], nro_pendientes: 0,
-				listo_pagar: { id: null, startus: 1, empleado_id:null, codigo_pago:null  },
-				spinnerIs:{empleado:false, pago:false},
-				c: {nro:null, titular:null, cedula:null, empleado_id: null}, lista_cuentas : [],
-				cuentas_empleado: [], info_cuenta: []
-			}, 
-			methods:{
-				getEmpleado:function(){
-					this.spinnerIs.empleado = true
-					axios.get(this.routeLink+"empleados").then( resp => {
-						this.spinnerIs.empleado = false
-						this.list_empleados = resp.data
-						this.nro_empleado = resp.data.length					
-					})
-				},
-				empleado:function(is){
-					if(is == 'new'){
-						axios.post(this.routeLink+"empleados",this.e).then( resp => {
-							console.log(resp)
-							this.getEmpleado()
-							$('#newEmpleadoModal').modal('hide')
-						}, error => {
-							console.log(error)
-						})
-					}
-
-					if(is == 'edit'){
-						axios.put(this.routeLink+"empleados/"+this.e.id,this.e).then( resp => {
-							console.log(resp)
-							this.getEmpleado()
-							$('#editEmpleadoModal').modal('hide')
-						}, error => {
-							console.log(error)
-						})
-					}
-
-				},
-				editEmpleado:function(empleado){
-					this.e.id = empleado.id
-					this.e.empleado = empleado.empleado
-					$('#editEmpleadoModal').modal('show')
-				},
-				perfilEmpleado:function(idEmpleado){
-					this.getListaPagosListos(idEmpleado)
-					axios.get(this.routeLink+"empleados/"+idEmpleado).then( resp => {
-						this.p_empleado = resp.data
-					})					
-					$('#PerfilEmpleadoModal').modal('show')
-				},				
-
-				getListaPagos:function(){
-					this.spinnerIs.pago = true
-					axios.get(this.routeLink+"pendientes").then( resp => {						
-						this.spinnerIs.pago = false
-						this.list_pagos = resp.data.data
-						this.nro_pendientes = resp.data.data.length
-					})
-				},
-				pagos:function(is){
-					if(is == 'new'){
-						axios.post(this.routeLink+"pagos",this.p).then( resp => {
-							this.list_pagos = resp.data
-							this.getListaPagos()
-							$('#newPagoModal').modal('hide')
-						})
-					} 
-				},
-				pagarEmpleado:function(empleado){
-					$('#PagarPagoModal').modal('show')
-					this.listo_pagar.id = empleado.id
-					this.listo_pagar.empleado_id = empleado.empleado_id								
-				},
-				pagarListo:function(){
-					axios.put(this.routeLink+'pagos/'+this.listo_pagar.id, this.listo_pagar).then( resp => {
-						$('#PagarPagoModal').modal('hide')
-						this.getListaPagosListos(resp.data.empleado_id)
-						this.getListaPagos()
-					})
-				},
-				getListaPagosListos:function(idEmpleado){
-					axios.get(this.routeLink+"listos/"+idEmpleado).then( resp => {						
-						this.list_pagos_listos = resp.data.data
-					})
-				},
-
-				getCuenta(empleado){
-					axios.get(this.routeLink+'cuentas/'+empleado).then( resp => {
-						this.lista_cuentas = resp.data
-					});
-				},
-				cuentaEmpleado:function(data){
-					this.infoEmpleado = data
-					this.c.empleado_id = data.id
-					$('#cuentaEmpleadoModal').modal('show')
-					this.getCuenta(data.id)
-				},
-				addCuenta(){
-					axios.post(this.routeLink+'cuentas', this.c).then( resp => {
-						this.getCuenta(resp.data.data.empleado_id)
-					})
-				},
-				deleteCuenta:function(id){
-					axios.get(this.routeLink+'delete-cuenta/'+id).then( resp => {
-						this.getCuenta(id)
-					})
-				},
-				nroCuentas:function(data){
-					axios.get(this.routeLink+'cuentas/'+data.target.value).then( resp => {
-						this.cuentas_empleado = resp.data
-					});
-				},
-				infoCuenta:function(data){
-					this.info_cuenta = data
-					$('#cuentaInfoEmpleadoModal').modal('show')
-				}							
-			}
-		})
-	</script>
+	
+	<script src='script.js'></script>
 </body>
 </html>

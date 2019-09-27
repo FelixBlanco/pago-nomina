@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Empleado;
+use App\Cuenta;
 
 class empleadosController extends Controller
 {
@@ -48,7 +49,7 @@ class empleadosController extends Controller
      */
     public function show($id)
     {
-        return Empleado::find($id);
+       return $empleado = Empleado::find($id);
     }
 
     /**
